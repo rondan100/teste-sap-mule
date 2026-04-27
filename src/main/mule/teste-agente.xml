@@ -10,7 +10,8 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	</http:listener-config>
 	<flow name="teste-agenteFlow" doc:id="4701beec-996f-4cab-97bc-7396ee905c18" >
 		<http:listener doc:name="Listener" doc:id="71538c00-9396-4d83-b503-17c533711f89" config-ref="HTTP_Listener_config" path="/api/agente"/>
-		<ee:transform doc:name="Status Response" doc:id="3f3f3f3f-3f3f-3f3f-3f3f-3f3f3f3f3f3f" >
+		<logger level="INFO" doc:name="Log Request" doc:id="a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6" message='#["Recebendo requisição no endpoint: " ++ attributes.requestPath]'/>
+		<ee:transform doc:name="Improved Status Response" doc:id="3f3f3f3f-3f3f-3f3f-3f3f-3f3f3f3f3f3f" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -18,7 +19,15 @@ output application/json
 {
 	status: "UP",
 	application: "teste-agente",
-	timestamp: now()
+	version: "1.0.0",
+	environment: "dev",
+	correlationId: correlationId,
+	requestDetails: {
+		path: attributes.requestPath,
+		method: attributes.method,
+		client: attributes.remoteAddress
+	},
+	timestamp: now() >> "UTC"
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
